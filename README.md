@@ -122,3 +122,85 @@ body {
   align-items: center;
   margin-bottom: 5px;
 }
+.qr-placeholder { font-size: 0.85rem; color: #888; text-align: center; }
+
+#last4 { font-size: 1.1rem; font-weight: bold; margin-top: 2px; }
+
+footer {
+  width: 100%;
+  text-align: center;
+  padding: 10px 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  font-size: 0.95rem;
+  color: #f0f0f0;
+  background: #1e1e1e;
+}
+
+.night { background: #121212; color: #f0f0f0; }
+.night .wrapper { background: #1e1e1e; }
+.night .preview-card { background: #2b2b2b; color: #f0f0f0; }
+.night .controls button { background: #0b5cff; color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <div class="controls">
+    <label for="ssccInput">SSCC Nummer</label>
+    <div class="input-row">
+      <input id="ssccInput" type="text" placeholder="SSCC eingeben oder scannen...">
+      <button id="clearBtn" title="Löschen">✖️</button>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button id="printTestBtn">Drucken</button>
+      <button id="downloadBtn">Download</button>
+    </div>
+    <div class="history-title">Letzte SSCC</div>
+    <div class="history" id="historyList"></div>
+  </div>
+
+  <div class="preview-card">
+    <div id="qrContainer">
+      <div class="qr-placeholder">📱 QR wird hier generiert</div>
+    </div>
+    <div id="last4">----</div>
+  </div>
+
+</div>
+
+<footer>
+  Made with ❤️ by Shkodran 🌓 Dunkelmodus
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const ssccInput = document.getElementById('ssccInput');
+const clearBtn = document.getElementById('clearBtn');
+const qrContainer = document.getElementById('qrContainer');
+const last4El = document.getElementById('last4');
+const printTestBtn = document.getElementById('printTestBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const historyList = document.getElementById('historyList');
+
+let qrCode = null;
+let ssccHistory = [];
+
+// Tema scuro al clic sul footer
+document.querySelector('footer')?.addEventListener('click', ()=>document.body.classList.toggle('night'));
+
+// Non caricare più la cronologia dal localStorage (parte innovativa sessione)
+ssccHistory = [];
+
+// Funzioni cronologia
+function addToHistory(sscc){
+  if(!sscc) return;
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  ssccHistory = ssccHistory.filter(item => item.value !== sscc);
+  ssccHistory.unshift({value:sscc, time:time});
+  if(ssccHistory.length > 6) ssccHistory.pop();
+  renderHistory();
+}
